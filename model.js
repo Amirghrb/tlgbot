@@ -12,12 +12,14 @@ const message = new Schema({
 const messageModel=db.model("message",message)
 
 const user = new Schema({
-    name:String,
-    userId: Number,
-    chatId: Number,
-    userName: String,
-    date: Date,
-    isJudge:Boolean
+  name:String,
+  userId: Number,
+  chatId: Number,
+  userName: String,
+  date: Date,
+  isJudge:Boolean,
+  isMainAdmin:Boolean,
+  isBaned:Boolean
 });
 const userModel =db.model("user",user)
 

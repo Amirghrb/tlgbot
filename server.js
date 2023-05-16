@@ -1,48 +1,21 @@
+require('dotenv').config()
 const TelegramBot = require('node-telegram-bot-api');
 const model =require("./model")
 const User= require("./User")
 const fs = require("fs")
 const delay = require("delay")
-// replace the value below with the Telegram token you receive from @BotFather
-const token = '6172566880:AAFi0HVpLT8FnhNdqHAMCVXH-H0BjZM4bqY';
 
+// replace the value below with the Telegram token you receive from @BotFather
+const token = process.env.TOKEN ;
+const channel = process.env.channel
 // Create a bot that uses 'polling' to fetch new updates
 const bot = new TelegramBot(token, {polling: true});
 let i=0
-// Matches "/echo [whatever]"
-bot.onText(/\/echo (.+)/, (msg, match) => {
-  // 'msg' is the received Message from Telegram
-  // 'match' is the result of executing the regexp above on the text content
-  // of the message
-
-  const chatId = msg.chat.id;
-  const resp = match[1]; // the captured "whatever"
-
-  // send back the matched "whatever" to the chat
-  bot.sendMessage(chatId, resp);
-});
-// Listen for any kind of message. There are different kinds of
-// messages.
-
-// bot.on('message', (msg) => {
-//   const chatId = msg.chat.id;
-//   i++
-//   // send a message to the chat acknowledging receipt of their message
-  // bot.sendMessage(chatId, 'Received your message',{
-  //   "reply_markup": {
-  //     "inline_keyboard": [[
-        
-  //       {
-  //         text:"inline",
-  //         callback_data:"kkk",
-          
-  //       }
-  //     ]]
-  //   }});
-//   });
  
 
 const homekey= [["send"],["🔜event maker"], ["🔜match maker"],["🔜....."]]
+const commandkey= [["home"]]
+const bankey= [["shame on me "]]
 const judgepan = [
   [{
     text:"approve",
@@ -65,64 +38,117 @@ const judgepan = [
 ]
 ]
 const send =async(msg,judge)=>{
-  bot.sendMessage(msg.chat.id,"بگو")
-  bot.once("message",(msg)=>{
-    bot.sendMessage(msg.chat.id,`زفت که تایید بشه`)
-    bot.sendMessage(judge.userId,msg.text,{
+  bot.sendMessage(msg.chat.id,"بگو",{
+    "reply_markup": {
+    "keyboard": commandkey
+  }})
+  console.log(msg);
+    bot.once("message",(msg)=>{
+      if (msg.text=="home"){
+        bot.sendMessage(msg.chat.id,"اشکال نداره دفعه بعد ",{
+          "reply_markup": {
+          "keyboard": homekey
+        }})
+      }else{
+      bot.sendMessage(msg.chat.id,`رفت که تایید بشه`,{
+      "reply_markup": {
+      "keyboard": homekey
+    }})
+    const message =  `${msg.text}@${msg.chat.id}@${msg.from.username}`   
+
+    bot.sendMessage(judge.userId,message,{
       "reply_markup": {
         "inline_keyboard": judgepan
       }})
-  })
-}
-  bot.onText(/\/start/, (msg) => {
-    const user={
-      "name":`${msg.from.first_name } ${msg.from.last_name}`,
-      "username":msg.from.username,
-      "userId":msg.from.id,
-      "chatId":msg.chat.id,
-      "time":String(Date.now())
     }
-    ss=User.create(user)
-    bot.sendMessage(msg.chat.id, `${ss}`, {
-      "reply_markup": {
-        "keyboard": homekey
-      }
-    });
+  })}
+
+
+  bot.onText(/\/start/, async(msg) => {
+    let user={
+      name:`${msg.from.first_name } ${((msg.from.last_name!=undefined)?msg.from.last_name:"")}`,
+      username:msg.from.username,
+      userId:msg.from.id,
+      chatId:msg.chat.id,
+      time:String(Date.now())
+    }
+    let usercount = await User.userCount()
+   let ss=`عزیز ${typeof(usercount)}\n به بات کراش یاب خوش امدید \n برای ارسال پیام خود دکمه send را بزنین و پیام خود را ارسال کنید \n`
+    if (usercount==0){
+      user["isMainAdmin"]=true
+      user["isJudge"]=true
+      ss+="\n \n you are main admin now "
+      User.create(user)
+      bot.sendMessage(msg.chat.id, `${ss}`, {
+        "reply_markup": {
+          "keyboard": homekey
+        }
+      });
+    }else{
+      User.create(user)
+      bot.sendMessage(msg.chat.id, `${ss}`, {
+        "reply_markup": {
+          "keyboard": homekey
+        }
+      });
+    }
     
   });
   
 
 
   bot.on("message",async(msg)=>{
-    const judge=await User.getJudge()
     // bot.sendMessage(msg.chat.id,`${judge.userId}`)
+    const isBaned = await User.isUserBandById(msg.chat.id)
+    console.log(isBaned);
+if(!isBaned){
     if (msg.text=="send"){
+      const judge=await User.getJudge()
       await send(msg,judge)
     }else if(msg.text=="🔜event maker"||msg.text=="🔜....."||msg.text=="🔜match maker"){
-      bot.sendMessage(msg.chat.id,"\n هر ۳۰۰۰ تا عضو یک ویژگی جدید \n ویژگی بعدی : 🔜event maker \n با این ویژگی میتونی ایونت بسازی  ")
+      bot.sendMessage(msg.chat.id,"\n هر 500 تا عضو یک ویژگی جدید \n ویژگی بعدی : 🔜event maker \n با این ویژگی میتونی ایونت بسازی  ")
     }
-
-  })
-  
-  bot.on("polling_error", console.log);
-
-  bot.onText(/\/addJudge/, (msg) => {
-    User.addJudge(msg.from.id) 
-    bot.sendMessage(msg.chat.id, `judge added`, {
-      "reply_markup": {
-        "keyboard": [["hi", "bye✌🏻"],["/echo hi"],["I'm robot"]]
+  }else{
+    bot.sendMessage(msg.chat.id,"you are baned 🗿🗿🗿",{
+      "reply_markup":{
+     keyboard: bankey
       }
-    });
+    })
+  }
+  })
+  bot.on("polling_error", console.log);
+  bot.onText(/\/addJudge/, (msg) => {
+    if(User.isAdminById(msg.chat.id)){
+      let userId=msg.text.split(" ")[1]
+      User.addJudge(userId) 
+      bot.sendMessage(msg.chat.id, `judge added \n ${msg.text.split(" ")[1]}`, {
+        "reply_markup": {
+          "keyboard": homekey
+        }
+      });
+    }else{
+      bot.sendMessage(msg.chat.id, `access error you are not main admin`, {
+        "reply_markup": {
+          "keyboard": homekey
+        }
+      });
+    }
   });
 
-  bot.addListener("callback_query",(msg)=>{
+  bot.addListener("callback_query",async(msg)=>{
     // console.log(JSON.stringify(msg));
+
+    let text=msg.message.text.split("@")
     if(msg.data=="approved"){
-      bot.sendMessage("@fumcrshyb",`${msg.message.text}`)
-      bot.sendMessage(msg.from.id,"your message published ✅")
+      bot.sendMessage(channel,`${text[0]}`)
+// bot forward stringify <-> jsonify
+      bot.sendMessage(text[1],"your message published ✅")
     }else if(msg.data=="notAprove"){
-      bot.sendMessage(msg.from.id,"your message not published ❌")
-    }else if(msg.data=="ban usser"){
+      bot.sendMessage(text[1],"your message not published ❌")
+    }else if(msg.data=="ban user"){
+        let  res=await User.banUser(+text[1])
+        bot.sendMessage(text[1],"you are baned 🗿")
+        bot.sendMessage(msg.from.id,`user ${text[1]} : \n ${res} `)
 
     }else{
       bot.sendMessage(msg.from.id,"CallBack Error")
@@ -179,7 +205,7 @@ bot.onText(/\/loadup/,async(msg)=>{
     if(typeof(Message.loadMessages(i))=="string"){
      if(i%5==0)
      await delay(5000);
-    bot.sendMessage("@fumcrshyb",`\n${  Message.loadMessages(i)} \n @fumcrshyb`)
+    bot.sendMessage(channel,`\n${  Message.loadMessages(i)} \n @fumcrshyb`)
       await delay(5000);
       
   }

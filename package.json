@@ -15,6 +15,7 @@
   "dependencies": {
     "big-json": "^3.2.0",
     "delay": "^5.0.0",
+    "dotenv": "^16.0.3",
     "mongoose": "^7.0.4",
     "node-telegram-bot-api": "^0.61.0",
     "nodemon": "^2.0.22"
