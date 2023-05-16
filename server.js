@@ -42,7 +42,6 @@ const send =async(msg,judge)=>{
     "reply_markup": {
     "keyboard": commandkey
   }})
-  console.log(msg);
     bot.once("message",(msg)=>{
       if (msg.text=="home"){
         bot.sendMessage(msg.chat.id,"اشکال نداره دفعه بعد ",{
@@ -100,7 +99,6 @@ const send =async(msg,judge)=>{
   bot.on("message",async(msg)=>{
     // bot.sendMessage(msg.chat.id,`${judge.userId}`)
     const isBaned = await User.isUserBandById(msg.chat.id)
-    console.log(isBaned);
 if(!isBaned){
     if (msg.text=="send"){
       const judge=await User.getJudge()

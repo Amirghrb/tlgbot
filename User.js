@@ -5,7 +5,7 @@ const user = models.userModel
 const create =async (userData)=>{
    let find=[] 
    find=await user.find({userId:userData.userId})
-   console.log(find.length,typeof (find));
+//    console.log(find.length,typeof (find));
    if(find.length==0){
         await user.collection.insertOne({
            username:(userData.username!=undefined?userData.username:""),
@@ -37,7 +37,7 @@ const addJudge =async (userId)=>{
 const banUser =async (userId)=>{
    let find=[] 
    find=await user.findOne({userId:userId})
-   console.log(userId,typeof find,find,find.length);
+//    console.log(userId,typeof find,find,find.length);
    if(typeof(find)=="object"){
        await user.updateOne({
         userId:userId

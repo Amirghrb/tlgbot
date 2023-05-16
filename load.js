@@ -7,8 +7,8 @@ const loadMessages = (id)=>{
 const Messageslen = ()=>{
     return message.messages.length
 
-  }
-console.log(Messageslen())
+//   }
+// console.log(Messageslen())?
 module.exports={
     loadMessages,
     Messageslen
