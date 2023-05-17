@@ -37,6 +37,7 @@ const judgepan = [
   }
 ]
 ]
+
 const send =async(msg,judge)=>{
   bot.sendMessage(msg.chat.id,"بگو",{
     "reply_markup": {
@@ -72,7 +73,7 @@ const send =async(msg,judge)=>{
       time:String(Date.now())
     }
     let usercount = await User.userCount()
-   let ss=`عزیز ${typeof(usercount)}\n به بات کراش یاب خوش امدید \n برای ارسال پیام خود دکمه send را بزنین و پیام خود را ارسال کنید \n`
+   let ss=`عزیز ${user.name}\n به بات کراش یاب خوش امدید \n برای ارسال پیام خود دکمه send را بزنین و پیام خود را ارسال کنید \n`
     if (usercount==0){
       user["isMainAdmin"]=true
       user["isJudge"]=true
